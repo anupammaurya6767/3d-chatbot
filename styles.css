@@ -1,67 +1,140 @@
 body {
     margin: 0;
-    overflow: hidden;
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    overflow: hidden;
 }
 
-#chat-container {
+#ui-container {
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.8);
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    z-index: 100;
 }
 
-#question-display {
-    font-size: 18px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-button {
+.control-button {
     margin: 5px;
     padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
     border: none;
     border-radius: 5px;
+    background-color: #4285F4;
+    color: white;
+    cursor: pointer;
     transition: background-color 0.3s;
 }
 
-button:hover {
-    background-color: #45a049;
+.control-button:hover {
+    background-color: #3367D6;
 }
 
-#micButton.listening {
-    background-color: #ff4444;
+.control-button.listening {
+    background-color: #EA4335;
+}
+
+#template-selector {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.shareable-link {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    word-break: break-all;
 }
 
 #summary {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 80%;
-    max-height: 80%;
-    overflow-y: auto;
-    display: none;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
 }
 
-#downloadButton {
+#question-display {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+#timer-display {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: bold;
+}
+
+#submitButton {
+    background-color: #34A853;
+    margin-top: 10px;
+}
+
+#submitButton:hover {
+    background-color: #2E8B47;
+}
+
+#listenButton {
+    background-color: #9370DB;
+}
+
+#listenButton:hover {
+    background-color: #7B68EE;
+}
+
+#video-preview-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    height: 240px;
+    border: 2px solid #4285F4;
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+    background: #000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#user-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+#video-controls {
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 4px;
     display: none;
+}
+
+#video-controls button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    margin: 0 2px;
+    font-size: 16px;
+}
+
+#video-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+#video-preview-container:hover #video-controls {
+    display: block;
+}
+
+.dragging {
+    opacity: 0.7;
+    cursor: grabbing !important;
 }

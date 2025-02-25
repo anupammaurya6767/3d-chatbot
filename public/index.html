@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Interview System</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+        }
+
+        .control-button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4285F4;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover {
+            background-color: #3367D6;
+        }
+
+        .control-button.listening {
+            background-color: #EA4335;
+        }
+
+        #template-selector {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .shareable-link {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+
+        #summary {
+            margin-top: 20px;
+        }
+
+        #question-display {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        #timer-display {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #submitButton {
+            background-color: #34A853;
+            margin-top: 10px;
+        }
+
+        #submitButton:hover {
+            background-color: #2E8B47;
+        }
+
+        /* Update listen button style */
+        #listenButton {
+            background-color: #9370DB;
+        }
+
+        #listenButton:hover {
+            background-color: #7B68EE;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-container">
+        <div id="template-container">
+            <h2>Select Interview Template</h2>
+            <!-- Template selector will be inserted here -->
+        </div>
+
+        <div id="shareable-link" class="shareable-link"></div>
+
+        <div id="chat-container" style="display: none;">
+            <div id="question-display"></div>
+            <button id="listenButton" class="control-button">Listen to Question</button>
+            <button id="micButton" class="control-button">Start Listening</button>
+            <button id="nextButton" class="control-button" style="display: none;">Next Question</button>
+        </div>
+
+        <div id="summary" style="display: none;"></div>
+        <button id="downloadButton" class="control-button" style="display: none;">Download Interview</button>
+    </div>
+
+    
+</body>
+</html>
