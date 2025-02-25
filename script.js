@@ -26,41 +26,75 @@ videoPreview.id = 'video-preview';
 videoPreview.autoplay = true;
 videoPreview.muted = true; // Prevent audio feedback
 document.body.appendChild(videoPreview);
-// Template definitions
+
+// Language options
+const languages = {
+    en: 'English',
+    hi: 'Hindi'
+};
+
+// Template definitions with questions in multiple languages
 const questionTemplates = {
     personal: {
         name: "Personal Interview",
-        questions: [
-            "What is your name?",
-            "What is your age?",
-            "How are you feeling today?",
-            "What's your favorite color?",
-            "Tell me about your hobbies."
-        ]
+        questions: {
+            en: [
+                "What is your name?",
+                "What is your age?",
+                "How are you feeling today?",
+                "What's your favorite color?",
+                "Tell me about your hobbies."
+            ],
+            hi: [
+                "आपका नाम क्या है?",
+                "आपकी उम्र क्या है?",
+                "आज आप कैसा महसूस कर रहे हैं?",
+                "आपका पसंदीदा रंग क्या है?",
+                "अपने शौक के बारे में बताएं।"
+            ]
+        }
     },
     professional: {
         name: "Professional Interview",
-        questions: [
-            "What is your professional background?",
-            "Describe your ideal work environment",
-            "What are your career goals?",
-            "What's your greatest professional achievement?",
-            "How do you handle workplace challenges?"
-        ]
+        questions: {
+            en: [
+                "What is your professional background?",
+                "Describe your ideal work environment",
+                "What are your career goals?",
+                "What's your greatest professional achievement?",
+                "How do you handle workplace challenges?"
+            ],
+            hi: [
+                "आपका पेशेवर पृष्ठभूमि क्या है?",
+                "अपने आदर्श कार्य वातावरण का वर्णन करें",
+                "आपके करियर के लक्ष्य क्या हैं?",
+                "आपकी सबसे बड़ी पेशेवर उपलब्धि क्या है?",
+                "आप कार्यस्थल की चुनौतियों को कैसे संभालते हैं?"
+            ]
+        }
     },
     educational: {
         name: "Educational Interview",
-        questions: [
-            "What is your educational background?",
-            "What subjects interest you most?",
-            "Describe your learning style",
-            "What are your academic goals?",
-            "How do you approach studying?"
-        ]
+        questions: {
+            en: [
+                "What is your educational background?",
+                "What subjects interest you most?",
+                "Describe your learning style",
+                "What are your academic goals?",
+                "How do you approach studying?"
+            ],
+            hi: [
+                "आपकी शैक्षिक पृष्ठभूमि क्या है?",
+                "आपको सबसे अधिक रुचि वाले विषय क्या हैं?",
+                "अपनी सीखने की शैली का वर्णन करें",
+                "आपके शैक्षिक लक्ष्य क्या हैं?",
+                "आप अध्ययन के लिए कैसे तैयारी करते हैं?"
+            ]
+        }
     },
     custom: {
         name: "Custom Template",
-        questions: [] // Will be populated dynamically
+        questions: {} // Will be populated dynamically for each language
     }
 };
 
@@ -74,6 +108,7 @@ let remainingTime = 30;
 let isAnswering = false;
 let isPaused = false;
 let currentAnswer = '';
+let selectedLanguage = null; // User must select a language
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -102,18 +137,31 @@ function generateUniqueId() {
     return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Initialize template selector
+// Initialize language and template selectors
 function initializeTemplateSelector() {
-    const selector = document.createElement('select');
-    selector.id = 'template-selector';
-    selector.innerHTML = `
+    const languageSelector = document.createElement('select');
+    languageSelector.id = 'language-selector';
+    languageSelector.innerHTML = `
+        <option value="">Select Language</option>
+        ${Object.entries(languages).map(([key, name]) => 
+            `<option value="${key}">${name}</option>`
+        ).join('')}
+    `;
+    
+    languageSelector.addEventListener('change', (e) => {
+        selectedLanguage = e.target.value;
+    });
+    
+    const templateSelector = document.createElement('select');
+    templateSelector.id = 'template-selector';
+    templateSelector.innerHTML = `
         <option value="">Select Interview Template</option>
         ${Object.entries(questionTemplates).map(([key, template]) => 
             `<option value="${key}">${template.name}</option>`
         ).join('')}
     `;
     
-    selector.addEventListener('change', (e) => {
+    templateSelector.addEventListener('change', (e) => {
         if (e.target.value === 'custom') {
             promptForCustomTemplate();
         } else if (e.target.value) {
@@ -122,22 +170,28 @@ function initializeTemplateSelector() {
         }
     });
     
-    document.getElementById('template-container').appendChild(selector);
+    const container = document.getElementById('template-container');
+    container.appendChild(languageSelector);
+    container.appendChild(templateSelector);
 }
 
 function promptForCustomTemplate() {
+    if (!selectedLanguage) {
+        alert('Please select a language first.');
+        return;
+    }
     const questionsCount = prompt("How many questions would you like in your template?");
     const count = parseInt(questionsCount);
     
     if (count && count > 0) {
         const questions = [];
         for (let i = 0; i < count; i++) {
-            const question = prompt(`Enter question ${i + 1}:`);
+            const question = prompt(`Enter question ${i + 1} (in ${languages[selectedLanguage]}):`);
             if (question) questions.push(question);
         }
         
         if (questions.length > 0) {
-            questionTemplates.custom.questions = questions;
+            questionTemplates.custom.questions[selectedLanguage] = questions;
             currentTemplate = questionTemplates.custom;
             initializeNewInterview();
         }
@@ -145,6 +199,10 @@ function promptForCustomTemplate() {
 }
 
 function initializeNewInterview() {
+    if (!selectedLanguage) {
+        alert('Please select a language first.');
+        return;
+    }
     userUniqueId = generateUniqueId();
     const shareableLink = generateShareableLink();
     document.getElementById('shareable-link').textContent = 
@@ -167,8 +225,8 @@ function startInterview() {
 
 function displayQuestion() {
     const questionDisplay = document.getElementById('question-display');
-    if (currentTemplate && currentQuestionIndex < currentTemplate.questions.length) {
-        questionDisplay.textContent = currentTemplate.questions[currentQuestionIndex];
+    if (currentTemplate && currentQuestionIndex < currentTemplate.questions[selectedLanguage].length) {
+        questionDisplay.textContent = currentTemplate.questions[selectedLanguage][currentQuestionIndex];
         
         // Add timer display
         const timerDisplay = document.createElement('div');
@@ -185,10 +243,15 @@ function displayQuestion() {
         // Automatically read the question
         setTimeout(() => {
             const utterance = new SpeechSynthesisUtterance(
-                currentTemplate.questions[currentQuestionIndex]
+                currentTemplate.questions[selectedLanguage][currentQuestionIndex]
             );
+            utterance.lang = selectedLanguage === 'hi' ? 'hi-IN' : 'en-US';
+            const voices = synth.getVoices();
+            const langVoices = voices.filter(voice => voice.lang === (selectedLanguage === 'hi' ? 'hi-IN' : 'en-US'));
+            if (langVoices.length > 0) {
+                utterance.voice = langVoices[0];
+            }
             utterance.onend = () => {
-                // Start recording after question is read
                 startAnswering();
             };
             synth.speak(utterance);
@@ -209,21 +272,18 @@ function startAnswering() {
     controlsContainer.id = 'answer-controls';
     controlsContainer.className = 'controls-container';
     
-    // Create pause/resume button
     const pauseButton = document.createElement('button');
     pauseButton.id = 'pauseButton';
     pauseButton.className = 'control-button';
     pauseButton.textContent = 'Pause';
     pauseButton.onclick = togglePause;
     
-    // Create submit button
     const submitButton = document.createElement('button');
     submitButton.id = 'submitButton';
     submitButton.className = 'control-button';
     submitButton.textContent = 'Submit Answer';
     submitButton.onclick = submitAnswer;
     
-    // Create restart button
     const restartButton = document.createElement('button');
     restartButton.id = 'restartButton';
     restartButton.className = 'control-button';
@@ -268,12 +328,10 @@ function restartAnswer() {
             delete answerVideos[currentQuestionIndex];
         }
         
-        // Reset UI
         const pauseButton = document.getElementById('pauseButton');
         pauseButton.textContent = 'Pause';
         document.getElementById('restartButton').style.display = 'none';
         
-        // Restart recording
         isPaused = false;
         startTimer();
         startListening();
@@ -282,21 +340,15 @@ function restartAnswer() {
 
 function startTimer() {
     const timerDisplay = document.getElementById('timer-display');
-    
     updateTimerDisplay();
     
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
+    if (timerInterval) clearInterval(timerInterval);
     
     timerInterval = setInterval(() => {
         if (!isPaused) {
             remainingTime--;
             updateTimerDisplay();
-            
-            if (remainingTime <= 0) {
-                submitAnswer();
-            }
+            if (remainingTime <= 0) submitAnswer();
         }
     }, 1000);
 }
@@ -312,33 +364,25 @@ function submitAnswer() {
     isAnswering = false;
     isPaused = false;
     
-    // Remove control buttons
     const controlsContainer = document.getElementById('answer-controls');
-    if (controlsContainer) {
-        controlsContainer.remove();
-    }
+    if (controlsContainer) controlsContainer.remove();
     
-    // Show next button
     document.getElementById('nextButton').style.display = 'inline-block';
 }
 
 function createJarvis() {
     const group = new THREE.Group();
-
-    // Body
     const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.3, 1.5, 20);
     const bodyMaterial = new THREE.MeshPhongMaterial({ color: chatbotState.color });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     group.add(body);
 
-    // Head
     const headGeometry = new THREE.SphereGeometry(0.3, 32, 32);
     const headMaterial = new THREE.MeshPhongMaterial({ color: chatbotState.color });
     const head = new THREE.Mesh(headGeometry, headMaterial);
     head.position.y = 1;
     group.add(head);
 
-    // Eyes
     const eyeGeometry = new THREE.SphereGeometry(0.05, 32, 32);
     const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
@@ -368,7 +412,6 @@ function initThreeJS() {
     // scene.add(jarvis);
 
     camera.position.z = 5;
-
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -384,7 +427,6 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
-    
     const delta = clock.getDelta();
     
     if (chatbotState.mood === 'happy') {
@@ -396,14 +438,14 @@ function animate() {
     }
     
     if (controls) controls.update();
-    
     renderer.render(scene, camera);
 }
 
 function updateChatbotState(transcript) {
-    if (transcript.toLowerCase().includes('happy') || transcript.toLowerCase().includes('good')) {
+    const lowerTranscript = transcript.toLowerCase();
+    if (lowerTranscript.includes('happy') || lowerTranscript.includes('good')) {
         chatbotState.mood = 'happy';
-    } else if (transcript.toLowerCase().includes('sad') || transcript.toLowerCase().includes('bad')) {
+    } else if (lowerTranscript.includes('sad') || lowerTranscript.includes('bad')) {
         chatbotState.mood = 'sad';
     } else {
         chatbotState.mood = 'neutral';
@@ -419,7 +461,7 @@ function updateChatbotState(transcript) {
     };
 
     for (let color in colorMap) {
-        if (transcript.toLowerCase().includes(color)) {
+        if (lowerTranscript.includes(color)) {
             chatbotState.color = colorMap[color];
             updateJarvisColor(chatbotState.color);
             break;
@@ -437,15 +479,9 @@ function updateJarvisColor(color) {
 
 async function setupMediaStream() {
     try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ 
-            video: true, 
-            audio: true 
-        });
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         console.log('Media permissions granted');
-        
-        // Connect media stream to video preview
         videoPreview.srcObject = mediaStream;
-        
         initializeSpeechRecognition();
     } catch (error) {
         console.error('Error accessing media devices:', error);
@@ -454,22 +490,21 @@ async function setupMediaStream() {
 }
 
 function initializeSpeechRecognition() {
+    recognition.lang = selectedLanguage === 'hi' ? 'hi-IN' : 'en-US';
     recognition.start();
-    console.log('Speech recognition initialized');
+    console.log('Speech recognition initialized with language:', recognition.lang);
     
     recognition.onresult = (event) => {
         if (isListening && !isPaused) {
             const transcript = event.results[event.results.length - 1][0].transcript;
             console.log('User said:', transcript);
-            userAnswers[currentQuestionIndex] = currentAnswer + ' ' + transcript;
+            userAnswers[currentQuestionIndex] = (currentAnswer + ' ' + transcript).trim();
             updateChatbotState(transcript);
         }
     };
 
     recognition.onend = () => {
-        if (isListening && !isPaused) {
-            recognition.start();
-        }
+        if (isListening && !isPaused) recognition.start();
     };
 
     recognition.onerror = (event) => {
@@ -502,9 +537,7 @@ function startRecording() {
     if (mediaStream && !isPaused) {
         mediaRecorder = new MediaRecorder(mediaStream);
         mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                recordedChunks.push(event.data);
-            }
+            if (event.data.size > 0) recordedChunks.push(event.data);
         };
         mediaRecorder.start();
     }
@@ -528,9 +561,9 @@ function showSummary() {
         <p>Interview ID: ${userUniqueId}</p>
     `;
     
-    for (let i = 0; i < currentTemplate.questions.length; i++) {
+    for (let i = 0; i < currentTemplate.questions[selectedLanguage].length; i++) {
         summaryDiv.innerHTML += `
-            <p><strong>${currentTemplate.questions[i]}</strong> 
+            <p><strong>${currentTemplate.questions[selectedLanguage][i]}</strong> 
             ${userAnswers[i] || 'No answer provided'}</p>
         `;
     }
@@ -545,35 +578,27 @@ async function createZipFile() {
     const userFolder = zip.folder(userUniqueId);
     const answersFolder = userFolder.folder("answers");
 
-    // Save template information
     userFolder.file("interview_info.json", JSON.stringify({
         templateName: currentTemplate.name,
         interviewId: userUniqueId,
         timestamp: new Date().toISOString(),
-        templateQuestions: currentTemplate.questions
+        templateQuestions: currentTemplate.questions[selectedLanguage],
+        language: selectedLanguage
     }));
 
-    // Save each question and answer
-    for (let i = 0; i < currentTemplate.questions.length; i++) {
+    for (let i = 0; i < currentTemplate.questions[selectedLanguage].length; i++) {
         const questionFolder = answersFolder.folder(`Question_${i + 1}`);
-        
-        // Save question text
-        questionFolder.file("question.txt", currentTemplate.questions[i]);
-        
-        // Save answer text
+        questionFolder.file("question.txt", currentTemplate.questions[selectedLanguage][i]);
         questionFolder.file("answer_text.txt", userAnswers[i] || "No answer provided");
-        
-        // Save video if available
         if (answerVideos[i]) {
             questionFolder.file(`answer_video.webm`, answerVideos[i]);
         }
     }
 
-    // Save summary
     answersFolder.file("summary.txt", document.getElementById('summary').innerText);
 
     try {
-        const content = await zip.generateAsync({type: "blob"});
+        const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `${userUniqueId}_interview.zip`);
     } catch (error) {
         console.error('Error creating zip file:', error);
@@ -589,30 +614,26 @@ function checkForExistingInterview() {
         userUniqueId = interviewId;
         document.getElementById('shareable-link').textContent = 
             `Viewing interview: ${interviewId}`;
-            
-        // Here you would typically fetch the existing interview data from a server
-        // For now, we'll just show a message
         alert('Note: To fully implement interview loading, you would need to set up server-side storage.');
     }
 }
 
 // Event listeners
 document.getElementById('micButton').addEventListener('click', () => {
-    if (isListening) {
-        stopListening();
-    } else {
-        startListening();
-    }
+    if (isListening) stopListening();
+    else startListening();
 });
 
 document.getElementById('listenButton').addEventListener('click', () => {
     if (currentTemplate) {
-        // Stop any ongoing speech
         synth.cancel();
-        
         const utterance = new SpeechSynthesisUtterance(
-            currentTemplate.questions[currentQuestionIndex]
+            currentTemplate.questions[selectedLanguage][currentQuestionIndex]
         );
+        utterance.lang = selectedLanguage === 'hi' ? 'hi-IN' : 'en-US';
+        const voices = synth.getVoices();
+        const langVoices = voices.filter(voice => voice.lang === (selectedLanguage === 'hi' ? 'hi-IN' : 'en-US'));
+        if (langVoices.length > 0) utterance.voice = langVoices[0];
         synth.speak(utterance);
     }
 });
@@ -621,7 +642,7 @@ document.getElementById('nextButton').addEventListener('click', () => {
     stopListening();
     clearInterval(timerInterval);
     currentQuestionIndex++;
-    if (currentTemplate && currentQuestionIndex < currentTemplate.questions.length) {
+    if (currentTemplate && currentQuestionIndex < currentTemplate.questions[selectedLanguage].length) {
         displayQuestion();
     } else {
         showSummary();
@@ -630,13 +651,11 @@ document.getElementById('nextButton').addEventListener('click', () => {
 
 document.getElementById('downloadButton').addEventListener('click', createZipFile);
 
-// Error handling for speech synthesis
 synth.onerror = (event) => {
     console.error('Speech synthesis error:', event);
     alert('There was an error with the text-to-speech system. Please try again.');
 };
 
-// Initialize everything
 async function init() {
     try {
         await setupMediaStream();
@@ -650,27 +669,13 @@ async function init() {
     }
 }
 
-// Start the application
 init();
 
-// Handle page unload
-window.addEventListener('beforeunload', (event) => {
+window.addEventListener('beforeunload', () => {
     clearInterval(timerInterval);
-    if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-    }
-    if (recognition) {
-        recognition.stop();
-    }
-    if (videoPreview.srcObject) {
-        videoPreview.srcObject = null;
-    }
+    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+    if (recognition) recognition.stop();
+    if (videoPreview.srcObject) videoPreview.srcObject = null;
 });
 
-// Export for potential module usage
-export {
-    questionTemplates,
-    startInterview,
-    createZipFile,
-    generateUniqueId
-};
+export { questionTemplates, startInterview, createZipFile, generateUniqueId };
